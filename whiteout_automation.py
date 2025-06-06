@@ -14,9 +14,9 @@ from datetime import datetime
 # ADB Configuration
 ADB_PATH = "adb"  # Make sure adb is in your PATH or use full path
 BLUESTACKS_PORT = "5555"
-
+NUMBER_OF_RALLIES = 2
 # Game Configuration
-CHECK_INTERVAL = 300  # seconds
+CHECK_INTERVAL = 3  # seconds
 RESOURCE_CHECK_INTERVAL = 0  # seconds
 BUILDING_CHECK_INTERVAL = 0  # seconds
 
@@ -32,7 +32,17 @@ TEMPLATES = {
     "online_rewards": "templates/online_rewards.png",
     "Tree_of_life": "templates/Tree_of_life.png",
     "red_2": "templates/red_2.png",
-    "cancel": "templates/cancel.png"
+    "cancel": "templates/cancel.png",
+    "heal_troops_button_1": "templates/heal_troops_button_1.png",
+    "heal_troops_button_2": "templates/heal_troops_button_2.png",
+    "heal_troops_button_3": "templates/heal_troops_button_3.png",
+    "heal_troops_button_4": "templates/heal_troops_button_4.png",
+    "heal_troops_button_5": "templates/heal_troops_button_5.png",
+    "heal_troops_button_6": "templates/heal_troops_button_6.png",
+    "heal_troops_button_7": "templates/heal_troops_button_7.png",
+    "heal_troops_button_8": "templates/heal_troops_button_8.png",
+    "heal_troops_button_9": "templates/heal_troops_button_9.png",
+    "chat_label": "templates/chat_label.png"
 }
 
 def connect_adb():
@@ -48,6 +58,11 @@ def swipe(x1, y1, x2, y2, duration=300):
     """Send swipe command via ADB"""
     subprocess.run([ADB_PATH, "shell", "input", "swipe", str(x1), str(y1), str(x2), str(y2), str(duration)])
     human_sleep(1,2)
+
+def input_text(text: str):
+    """Type text using ADB keyboard input"""
+    subprocess.run(["adb", "shell", "input", "text", text.replace(" ", "%s")])
+    human_sleep(1,2)  # Delay for game response
 
 def human_sleep(min_s: float, max_s: float):
     """Sleep with bell-curve distribution around midpoint"""
@@ -144,7 +159,7 @@ def find_in_region(template_name, region, threshold=0.8):
 
 
 
-
+#implemented
 def has_red_in_region(region, threshold=0.003, debug=False):
     x, y, w, h = region
     
@@ -181,88 +196,10 @@ def has_red_in_region(region, threshold=0.003, debug=False):
         print(f"threshold: {threshold:.2%}")
     return red_ratio > threshold
 
-
-# def extract_fraction(pattern: str) -> Optional[Tuple[int, int]]:
-#     """
-#     Extract numerator and denominator from "X/Y" patterns in game UI.
-    
-#     Args:
-#         pattern: String containing the fraction (e.g., "5/6 Troops")
-    
-#     Returns:
-#         Tuple of (numerator, denominator) or None if invalid
-    
-#     Example:
-#         >>> extract_fraction("5/6 Marching")
-#         (5, 6)
-#         >>> extract_fraction("Capacity: 3/8")
-#         (3, 8)
-#     """
-#     # Match all variants: "5/6", "3 /8", "Capacity: 2/10" etc.
-#     match = re.search(r"(\d+)\s*/\s*(\d+)", pattern)
-#     if not match:
-#         return None
-    
-#     try:
-#         numerator = int(match.group(1))
-#         denominator = int(match.group(2))
-#         return (numerator, denominator)
-#     except (ValueError, IndexError):
-#         return None
-
-# # Enhanced version with OCR pre-processing for BlueStacks
-# def read_game_fraction(
-#     region: Tuple[int, int, int, int], 
-#     preprocess: bool = True
-# ) -> Optional[Tuple[int, int]]:
-#     """
-#     Capture screen region and extract fraction using OCR.
-    
-#     Args:
-#         region: (x, y, width, height) of the UI element
-#         preprocess: Apply image processing for better OCR
-    
-#     Returns:
-#         (numerator, denominator) or None if failed
-#     """
-#     import cv2
-#     import pytesseract
-    
-#     # 1. Capture screen region
-#     x, y, w, h = region
-#     screen = capture_screen()
-#     roi = screen[y:y+h, x:x+w]
-    
-#     # 2. Preprocess for better OCR
-#     if preprocess:
-#         gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-#         _, binary = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY_INV)
-#         roi = cv2.bitwise_not(binary)
-    
-#     # 3. Extract text
-#     text = pytesseract.image_to_string(
-#         roi, 
-#         config='--psm 7 -c tessedit_char_whitelist=0123456789/'
-#     )
-    
-#     # 4. Parse fraction
-#     return extract_fraction(text)
-
-
-# def start_new_marches():
-#     """Get the number of current marches from the UI"""
-#     # This function needs to be implemented based on your game's UI
-#     # For now, we'll return a dummy value
-
-#     march_queue = read_game_fraction((1500, 200, 120, 40))
-#     if march_queue:
-#         used, total = march_queue
-#         if used < total:
-#             print(f"Buildings: {used}/{total} - Can start new construction")
-
+#implemented
 def start_new_polarTerror():
     i = 0
-    while i < 4:
+    while i < NUMBER_OF_RALLIES:
         tap(106,1736) #Search button
         tap(471,1831) #Polar Terror button
         tap(702,2441) #Search button
@@ -285,12 +222,14 @@ def start_new_polarTerror():
                 tap(83,71) # back button
         else: 
             i += 1
+    tap(361, 1517) #tap space
+    tap(361, 1517) #tap space again
     return True
 
 #implemented
 def train_troops():
     """Train troops if training is complete"""
-    tap(20, 1061) # SidePanel Location
+    tap(8, 1061) # SidePanel Location
     training_complete = find_in_region("training_complete", (48, 1075, 800, 100))
     if training_complete:
         print("Training complete detected - starting new training")
@@ -305,7 +244,7 @@ def train_troops():
         tap(93, 80) # Back Button
 
         # Lancer training
-        tap(20, 1061) # SidePanel Location
+        tap(8, 1061) # SidePanel Location
         tap(424, 1203) # Lancer Button
         tap(700, 1300)  # Centre of building
         tap(700, 1300)  # tap one more time        
@@ -315,7 +254,7 @@ def train_troops():
         tap(93, 80) # Back Button  
 
         # Marksman training
-        tap(20, 1061) # SidePanel Location
+        tap(8, 1061) # SidePanel Location
         tap(424, 1382) # Marksman Button
         tap(700, 1300)  # Centre of building
         tap(700, 1300)  # tap one more time
@@ -333,28 +272,6 @@ def train_troops():
         tap( 927, 1098) # Closing the Sidebar
         return False
 
-def manage_marching():
-    """Manage resource gathering marches"""
-    march_queue = find_template("march_queue")
-    if march_queue:
-        # Analyze queue count (this needs custom implementation based on your UI)
-        # For now, we'll assume we can detect available march slots
-        available_slots = 3 - get_current_marches()  # Implement get_current_marches() based on your UI
-        
-        if available_slots > 0:
-            print(f"Found {available_slots} available march slots - sending gatherers")
-            # Open world map
-            tap(100, 100)  # Adjust to your world map button
-            time.sleep(2)
-            
-            # Find and tap resource tiles
-            resource = find_template("collect_resources")
-            if resource:
-                tap(resource["x"], resource["y"])
-                tap(1400, 800)  # March button
-                tap(1400, 900)  # Confirm button
-                return True
-    return False
 
 #implemented
 def click_help():
@@ -363,6 +280,10 @@ def click_help():
     if help_button:
         print("Help button detected - clicking")
         tap(help_button["x"], help_button["y"])
+        chat_label = find_in_region("chat_label", (0, 0, 800, 200))
+        if chat_label:
+            print("Chat label detected - clicking back button")
+            tap(80,68) # Back button
         return True
     else:
         print("Help button not detected")
@@ -371,7 +292,7 @@ def click_help():
 #implemented
 def click_onine_rewards():
     """Click onine rewards button"""
-    tap(20, 1061) # SidePanel Location
+    tap(8, 1061) # SidePanel Location
     human_sleep(2,3)
     swipe(338,1629, 338, 50, 600) 
     online_rewards = find_in_region("online_rewards",(48, 1380, 800, 100))
@@ -389,7 +310,7 @@ def click_onine_rewards():
 
 def click_tree_of_life():
     """Click tree_of_life button"""
-    tap(20, 1061) # SidePanel Location
+    tap(8, 1061) # SidePanel Location
     human_sleep(2,4)
     swipe(338,1629, 338, 50, 600) 
     tree_of_life = find_in_region("Tree_of_life",(48, 1380, 800, 50))
@@ -401,6 +322,29 @@ def click_tree_of_life():
         print("tree_of_life button not detected")
         tap( 927, 1098) # Closing the Sidebar
         return False
+
+def find_animated_element(base_name: str, region: tuple, threshold=0.6, variants=9):
+    """Check multiple animation frames of the same element"""
+    for i in range(1, variants+1):
+        if result := find_in_region(f"{base_name}_{i}", region, threshold):
+            return result
+    return None
+
+def heal_troops():
+    """Heal troops if needed"""
+    heal_troops = find_animated_element("heal_troops_button", (1072, 2083, 90, 90))
+    if heal_troops:
+        print("Heal troops button detected - clicking")
+        tap(1072,2083) # Heal troops button
+        # tap (269,1878) # Quick select button
+        # tap(1066,803) # troop number cell
+        # input_text("175")
+        tap(1010,1848)
+        tap(1010,1848)
+        return True
+    return False
+
+        
 
 def manage_buildings():
     """Manage building construction"""
@@ -440,17 +384,17 @@ def main():
         # if train_troops():
         #     human_sleep(2,4)
         #     continue
-
-        # if click_help():
-        #     human_sleep(2,4)
-        #     continue
+        if click_help():            
+            continue
             
         # if click_onine_rewards():
-        #     human_sleep(2,4)
         #     continue
 
-        if start_new_polarTerror():
-            human_sleep(540,600) # wait 9-10 minutes for the Polar Terror to finish
+        # if start_new_polarTerror():
+        #     human_sleep(540,600) # wait 9-10 minutes for the Polar Terror to finish
+        #     continue
+
+        if heal_troops():
             continue
 
         # if click_tree_of_life():
