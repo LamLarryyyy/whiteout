@@ -1,0 +1,1 @@
+This is based on bluestack in MAC OSX non multi threaded development. The functions can be run independently but still buggy to run in the same time. Development will mainly focus on multithreaded version.
