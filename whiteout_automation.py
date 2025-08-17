@@ -393,18 +393,18 @@ def find_animated_element(base_name: str, region: tuple, threshold=0.8, variants
 
 def heal_troops(device_serial=None):
     """Heal troops if needed"""
-    heal_troops = find_animated_element("heal_troops_button", (1072, 2083, 90, 90), device_serial=device_serial)
-    if heal_troops:
-        print("Heal troops button detected - clicking")
-        tap(1072,2083, device_serial=device_serial) # Heal troops button
-        # tap (269,1878) # Quick select button
-        # tap(1066,803) # troop number cell
-        # input_text("175")
-        tap(1010,1848, device_serial=device_serial) # Heal button
-        tap(1010,1848, device_serial=device_serial) # Help button
+    # heal_troops = find_animated_element("heal_troops_button", (1072, 2083, 90, 90), device_serial=device_serial)
+    # if heal_troops:
+    print("Heal troops button detected - clicking")
+    tap(1072,2083, device_serial=device_serial) # Heal troops button
+    # tap (269,1878) # Quick select button
+    # tap(1066,803) # troop number cell
+    # input_text("175")
+    tap(1010,1848, device_serial=device_serial) # Heal button
+    tap(1010,1848, device_serial=device_serial) # Help button
         # tap(1191,391, device_serial=device_serial) # Close button
-        return True
-    return False
+    return True
+    # return False
 
 
 
@@ -458,16 +458,16 @@ def main():
                     if click_help(device_serial=device_serial):
                         continue
                     continue
-
+                #
                 # if click_help(device_serial=device_serial):
                 #     continue
 
                 # if click_onine_rewards(device_serial=device_serial):
                 #     continue
 
-                if start_new_polarTerror(device_serial=device_serial):
-                    human_sleep(500,550)
-                    continue
+                # if start_new_polarTerror(device_serial=device_serial):
+                #     human_sleep(500,550)
+                #     continue
 
 
                 # if click_tree_of_life():
